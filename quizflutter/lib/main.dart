@@ -19,7 +19,7 @@ class MyApp extends StatelessWidget {
           textTheme: TextTheme(
             headline1: TextStyle(
               color: Colors.white,
-              fontSize: 30.0,
+              fontSize: 20.0,
               fontWeight: FontWeight.w500,
               shadows: [
                 Shadow(
@@ -40,7 +40,7 @@ class MyApp extends StatelessWidget {
           ),
           cardTheme: CardTheme(
             elevation: 6,
-            color: Colors.purple.shade700,
+            color: Colors.indigo.shade900,
             shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20.0)),
           )),
