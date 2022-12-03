@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:quizflutter/clases/question.dart';
 import 'package:quizflutter/clases/quiz.dart';
+import 'package:quizflutter/pages/result_page.dart';
 
 class QuizPage extends StatefulWidget {
   const QuizPage({super.key});
@@ -15,6 +16,7 @@ class _QuizPageState extends State<QuizPage> {
   int totalQuestions = 5;
   int totalOptions = 4;
   int questionIndex = 0;
+  int progressIndicator = 0;
   Quiz quiz = Quiz(name: 'Quiz de Capitales', questions: []);
 
   Future<void> readJson() async {
@@ -48,6 +50,73 @@ class _QuizPageState extends State<QuizPage> {
     readJson();
   }
 
+  void _optionSelected(String selected) {
+    quiz.questions[questionIndex].selected = selected;
+    if (selected == quiz.questions[questionIndex].answer) {
+      quiz.questions[questionIndex].correct = true;
+      quiz.right += 1;
+    }
+    progressIndicator += 1;
+
+    if (questionIndex < totalQuestions - 1) {
+      questionIndex += 1;
+    } else {
+      showDialog(
+          barrierDismissible: false,
+          context: context,
+          builder: (BuildContext context) => _buildResultDialog(context));
+    }
+    setState(() {});
+  }
+
+  //metodo que regresara un widget
+  Widget _buildResultDialog(BuildContext context) {
+    return AlertDialog(
+      title: Text('Resultados', style: Theme.of(context).textTheme.headline1),
+      backgroundColor: Theme.of(context).primaryColorDark,
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Preguntas Totales:$totalQuestions',
+            style: Theme.of(context).textTheme.bodyText1,
+          ),
+          Text(
+            'Correctas:${quiz.right}',
+            style: Theme.of(context).textTheme.bodyText1,
+          ),
+          Text(
+            'Incorrectas:${(totalQuestions - quiz.right)}',
+            style: Theme.of(context).textTheme.bodyText1,
+          ),
+          Text(
+            'Porcentaje:${quiz.percent}%',
+            style: Theme.of(context).textTheme.bodyText1,
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => ResultsPage(
+                        quiz: quiz,
+                      )),
+            );
+          },
+          child: Text(
+            'Ver Respuestas',
+            style: Theme.of(context).textTheme.bodyText1,
+          ),
+        )
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -66,7 +135,7 @@ class _QuizPageState extends State<QuizPage> {
               borderRadius: BorderRadius.circular(15.0),
               child: LinearProgressIndicator(
                 color: Colors.amber.shade900,
-                value: .5,
+                value: progressIndicator / totalQuestions,
                 minHeight: 20.0,
               ),
             ),
@@ -115,7 +184,11 @@ class _QuizPageState extends State<QuizPage> {
                                       style:
                                           Theme.of(context).textTheme.headline1,
                                     ),
-                                    onTap: () {},
+                                    onTap: () {
+                                      _optionSelected(quiz
+                                          .questions[questionIndex]
+                                          .options[index]);
+                                    },
                                   ),
                                 );
                               },
@@ -130,11 +203,10 @@ class _QuizPageState extends State<QuizPage> {
             ),
           ),
           TextButton(
-            onPressed: () {},
-            child: Text(
-              'skip',
-              style: Theme.of(context).textTheme.headline1,
-            ),
+            onPressed: () {
+              _optionSelected('Skipped');
+            },
+            child: Text('skip', style: Theme.of(context).textTheme.bodyText1),
           ),
         ],
       ),
